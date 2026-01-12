@@ -348,7 +348,7 @@ select {
   pointer-events: auto;
 }
 
-.modal {
+.instructions-modal {
   width: min(520px, 100%);
   background: var(--surface);
   border-radius: 18px;
@@ -357,24 +357,24 @@ select {
   border: 1px solid var(--border);
 }
 
-.modal-header {
+.instructions-modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.modal-body {
+.instructions-modal__body {
   margin-top: 12px;
   color: var(--text);
 }
 
-.modal-body ul {
+.instructions-modal__body ul {
   margin: 12px 0 0 18px;
   padding: 0;
   color: var(--muted);
 }
 
-.modal-body li {
+.instructions-modal__body li {
   margin-bottom: 6px;
 }
