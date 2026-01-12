@@ -151,7 +151,7 @@ function bindEventHandlers(elements) {
   });
 
   retryButton.addEventListener("click", () => {
-    prepareTest({ ...elements, statusEl });
+    prepareTest({ ...elements, statusEl, refreshPassage: true });
   });
 
   changeButton.addEventListener("click", () => {
@@ -216,8 +216,20 @@ function bindEventHandlers(elements) {
 /**
  * Transitions the test into the ready state.
  * Side effects: clears input, focuses input, resets timer state, and updates controls.
+ * If `refreshPassage` is true, swaps to a new passage before typing begins.
  */
-function prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl }) {
+function prepareTest({
+  inputEl,
+  startButton,
+  retryButton,
+  statusEl,
+  targetTextEl,
+  refreshPassage = false,
+}) {
+  if (refreshPassage) {
+    updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+  }
+
   inputEl.value = "";
   inputEl.disabled = false;
   inputEl.focus();
