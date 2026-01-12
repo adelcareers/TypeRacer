@@ -86,14 +86,25 @@ window.addEventListener("DOMContentLoaded", () => {
   const inputEl = document.getElementById("typing-input");
   const targetTextEl = document.getElementById("target-text");
   const statusEl = document.getElementById("test-status");
+  const difficultyEl = document.getElementById("difficulty");
+  const changeButton = document.getElementById("change-button");
 
-  if (!startButton || !retryButton || !inputEl || !targetTextEl || !statusEl) {
+  if (
+    !startButton ||
+    !retryButton ||
+    !inputEl ||
+    !targetTextEl ||
+    !statusEl ||
+    !difficultyEl ||
+    !changeButton
+  ) {
     return;
   }
 
   setStatus("idle", statusEl);
   inputEl.disabled = true;
   retryButton.disabled = true;
+  updateTargetText({ targetTextEl, inputEl }, state.difficulty);
 
   startButton.addEventListener("click", () => {
     if (state.status === "idle" || state.status === "finished") {
@@ -103,6 +114,29 @@ window.addEventListener("DOMContentLoaded", () => {
 
   retryButton.addEventListener("click", () => {
     prepareTest({ inputEl, startButton, retryButton, statusEl });
+  });
+
+  changeButton.addEventListener("click", () => {
+    if (state.status === "active") {
+      return;
+    }
+    updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+  });
+
+  difficultyEl.addEventListener("change", (event) => {
+    if (state.status === "active") {
+      difficultyEl.value = state.difficulty;
+      return;
+    }
+
+    state.difficulty = event.target.value;
+    updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+    if (state.status === "finished") {
+      setStatus("idle", statusEl);
+      inputEl.disabled = true;
+      startButton.disabled = false;
+      retryButton.disabled = true;
+    }
   });
 
   inputEl.addEventListener("input", () => {
