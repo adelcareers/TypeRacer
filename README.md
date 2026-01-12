@@ -131,3 +131,13 @@ This document serves as the source of truth for the TypeRacer project. It combin
 ## Tech Stack Recommendation
 - Frontend: HTML5, CSS3 (Flexbox/Grid), modern JavaScript (ES6+).
 - Storage: Browser `localStorage` API.
+
+---
+
+## GitHub Projects Import
+Use `project-import.csv` to import these user stories as draft items in GitHub Projects.
+
+Steps:
+1. Open your GitHub Project.
+2. Use "Add item" and choose "Import from CSV".
+3. Upload `project-import.csv`.
