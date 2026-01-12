@@ -141,3 +141,9 @@ Steps:
 1. Open your GitHub Project.
 2. Use "Add item" and choose "Import from CSV".
 3. Upload `project-import.csv`.
+
+---
+
+## Deployment
+- Live site: https://adelcareers.github.io/TypeRacer/
+- GitHub Pages is deployed via `.github/workflows/pages.yml`.
