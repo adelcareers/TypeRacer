@@ -173,6 +173,26 @@ select {
   margin-bottom: 16px;
 }
 
+.target-text span {
+  white-space: pre-wrap;
+}
+
+.char-correct {
+  color: #13746a;
+  background: rgba(19, 116, 106, 0.12);
+  border-radius: 4px;
+}
+
+.char-incorrect {
+  color: #b42318;
+  background: rgba(180, 35, 24, 0.12);
+  border-radius: 4px;
+}
+
+.char-current {
+  border-bottom: 2px solid #0f766e;
+}
+
 .typing-input {
   width: 100%;
   border-radius: 14px;
