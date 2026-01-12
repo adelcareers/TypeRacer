@@ -67,6 +67,9 @@ function getDomElements() {
   const statusEl = document.getElementById("test-status");
   const difficultyEl = document.getElementById("difficulty");
   const changeButton = document.getElementById("change-button");
+  const resultWpmEl = document.getElementById("result-wpm");
+  const resultAccuracyEl = document.getElementById("result-accuracy");
+  const resultTimeEl = document.getElementById("result-time");
 
   if (
     !startButton ||
@@ -75,7 +78,10 @@ function getDomElements() {
     !targetTextEl ||
     !statusEl ||
     !difficultyEl ||
-    !changeButton
+    !changeButton ||
+    !resultWpmEl ||
+    !resultAccuracyEl ||
+    !resultTimeEl
   ) {
     return null;
   }
@@ -88,6 +94,9 @@ function getDomElements() {
     statusEl,
     difficultyEl,
     changeButton,
+    resultWpmEl,
+    resultAccuracyEl,
+    resultTimeEl,
   };
 }
 
@@ -101,6 +110,7 @@ function initializeUI(elements) {
   elements.retryButton.disabled = true;
   updateTargetText(elements, state.difficulty);
   updateFeedback(elements.targetTextEl, elements.inputEl.value);
+  updateResults(elements, null);
 }
 
 /**
@@ -185,12 +195,16 @@ function prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl
  * Finalizes the test once the target text is fully matched.
  * Side effects: stamps end time, disables input, and updates controls.
  */
-function finishTest({ inputEl, startButton, retryButton, statusEl }) {
+function finishTest({ inputEl, startButton, retryButton, statusEl, resultWpmEl, resultAccuracyEl, resultTimeEl }) {
   state.endedAt = performance.now();
   inputEl.disabled = true;
   setStatus("finished", statusEl);
   startButton.disabled = false;
   retryButton.disabled = false;
+  updateResults(
+    { resultWpmEl, resultAccuracyEl, resultTimeEl },
+    calculateResults(inputEl.value, state.startedAt, state.endedAt)
+  );
 }
 
 // --- Feedback Rendering ---
@@ -249,6 +263,65 @@ function updateFeedback(targetTextEl, inputValue) {
       span.classList.add("char-current");
     }
   });
+}
+
+// --- Results Calculation ---
+/**
+ * Calculates WPM, accuracy, and elapsed time for the current test.
+ * Side effects: none; pure calculation based on input and timestamps.
+ * Assumes `startedAt` and `endedAt` are high-resolution timestamps from performance.now().
+ */
+function calculateResults(inputValue, startedAt, endedAt) {
+  if (!startedAt || !endedAt || endedAt <= startedAt) {
+    return { wpm: 0, accuracy: 0, seconds: 0 };
+  }
+
+  const totalChars = inputValue.length;
+  const correctChars = countCorrectCharacters(inputValue);
+  const minutes = (endedAt - startedAt) / 60000;
+  const wpm = Math.round((correctChars / 5) / minutes);
+  const accuracy = totalChars === 0 ? 0 : Math.round((correctChars / totalChars) * 100);
+  const seconds = Math.round((endedAt - startedAt) / 1000);
+
+  return { wpm, accuracy, seconds };
+}
+
+/**
+ * Counts correctly typed characters by comparing typed input to the target text.
+ * Side effects: none; uses the currently rendered target spans as the source of truth.
+ */
+function countCorrectCharacters(inputValue) {
+  const targetTextEl = document.getElementById("target-text");
+  if (!targetTextEl) {
+    return 0;
+  }
+
+  const target = targetTextEl.textContent || "";
+  let correct = 0;
+  for (let i = 0; i < inputValue.length && i < target.length; i += 1) {
+    if (inputValue[i] === target[i]) {
+      correct += 1;
+    }
+  }
+
+  return correct;
+}
+
+/**
+ * Updates the results UI based on the latest calculation or resets to placeholder state.
+ * Side effects: mutates DOM text for WPM, accuracy, and time.
+ */
+function updateResults({ resultWpmEl, resultAccuracyEl, resultTimeEl }, results) {
+  if (!results) {
+    resultWpmEl.textContent = "--";
+    resultAccuracyEl.textContent = "--";
+    resultTimeEl.textContent = "--";
+    return;
+  }
+
+  resultWpmEl.textContent = results.wpm.toString();
+  resultAccuracyEl.textContent = `${results.accuracy}%`;
+  resultTimeEl.textContent = `${results.seconds}s`;
 }
 
 // --- Utilities ---
