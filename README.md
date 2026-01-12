@@ -1,5 +1,7 @@
 # TypeRacer Application - Requirements and User Stories
 
+[![Deploy to GitHub Pages](https://github.com/adelcareers/TypeRacer/actions/workflows/pages.yml/badge.svg)](https://github.com/adelcareers/TypeRacer/actions/workflows/pages.yml)
+
 This document serves as the source of truth for the TypeRacer project. It combines high-level business requirements with technical UX logic for a professional-grade typing speed application.
 
 ---
