@@ -1,197 +1,133 @@
-# TypeRacer User Stories
+# TypeRacer Application - Requirements and User Stories
 
-**User story**
-
-As a learner, I want the test to work on desktop, tablet, and mobile so that I can practice anywhere.
-
-**Acceptance Criteria:**
-
-- [ ] Layout adapts for desktop, tablet, and mobile without horizontal scrolling
-- [ ] Typing area remains fully visible on small screens
-- [ ] Buttons and text are readable and tappable on touch devices
-
-**Tasks:**
-
-- [ ] Create responsive layout rules for common breakpoints
-- [ ] Ensure typing area scales to fit small screens
-- [ ] Adjust typography and button sizes for touch
+This document serves as the source of truth for the TypeRacer project. It combines high-level business requirements with technical UX logic for a professional-grade typing speed application.
 
 ---
 
-**User story**
-
-As a new user, I want a simple start button so that I can begin the test quickly.
+## 1. Responsive and Accessible Design (Must-Have)
+**User Story:** As a user, I want the website to be fully responsive and accessible so that I can practice my typing on any device without layout issues.
 
 **Acceptance Criteria:**
-
-- [ ] A single "Start" action begins the test
-- [ ] Timer starts on the first keystroke after Start
-- [ ] Input focus moves to the typing area automatically
+- The layout adapts to desktop, tablet, and smartphone without horizontal scrolling.
+- Typing area and target text remain fully visible when the mobile on-screen keyboard is active.
+- All interactive elements meet a minimum touch target size of 44x44px.
 
 **Tasks:**
-
-- [ ] Add Start button and connect it to test state
-- [ ] Start timer on first keystroke after Start
-- [ ] Auto-focus the input when Start is clicked
+- [ ] Implement a fluid grid layout using CSS Flexbox/Grid.
+- [ ] Set up media queries for common breakpoints (mobile, tablet, desktop).
+- [ ] Audit typography and button sizes for mobile tappability.
+- [ ] Use `100dvh` or a `visualViewport`-based CSS variable to avoid mobile viewport jump.
 
 ---
 
-**User story**
-
-As a user, I want to choose a difficulty level so that I can take a test that fits my skill.
+## 2. Intelligent Test Engine (Must-Have)
+**User Story:** As a casual user, I want a frictionless way to start and finish the test so that my WPM results are not skewed by manual mouse clicks.
 
 **Acceptance Criteria:**
-
-- [ ] User can choose at least 3 difficulty levels
-- [ ] Each level uses distinct text length/complexity
-- [ ] Selected difficulty is shown during the test
+- Clicking a "Start" button prepares the test and focuses the input area.
+- The timer begins automatically on the first keystroke.
+- The test ends when the final character is correctly typed (errors must be fixed to finish).
+- Input is disabled until the "Start" button is clicked and after the test completes.
+- A clear "Retry" action is available to start a new test.
 
 **Tasks:**
-
-- [ ] Build difficulty selector UI
-- [ ] Map each difficulty to specific text pools
-- [ ] Display chosen difficulty in the test view
+- [ ] Create a test state manager (Idle, Ready, Active, Finished).
+- [ ] Implement an event listener to trigger the timer on the first `keydown`.
+- [ ] Add logic to finish the test when typed text matches target text.
+- [ ] Auto-focus the input field when the "Start" state is triggered.
 
 ---
 
-**User story**
-
-As a user, I want a selection of text passages so that I can practice with varied content.
+## 3. Dynamic Sample Text and Difficulty (Must-Have)
+**User Story:** As a user, I want to choose a difficulty level and see a preview of the text so that I can practice with varied content suited to my skill.
 
 **Acceptance Criteria:**
-
-- [ ] User can switch to another passage before starting
-- [ ] Passages are randomly selected from a pool per difficulty
-- [ ] No passage repeats immediately on retry (if pool allows)
+- User can select Easy, Medium, or Hard difficulty.
+- Each level pulls from a specific pool of text passages.
+- A preview of the selected passage is shown before the test starts.
+- A "Change Passage" button allows the user to swap text before the test starts.
 
 **Tasks:**
-
-- [ ] Create passage pools per difficulty level
-- [ ] Add "change passage" option before start
-- [ ] Prevent immediate repeats when retrying
+- [ ] Create a JSON data structure containing text pools for each level.
+- [ ] Implement a random selection algorithm that prevents immediate text repetition.
+- [ ] Build a UI difficulty selector that updates the displayed sample text instantly.
 
 ---
 
-**User story**
-
-As a user, I want a paragraph shown before I type so that I can see what I need to enter.
+## 4. Character-Level Real-Time Feedback (Must-Have)
+**User Story:** As a user, I want to see exactly which character I have typed incorrectly in real time so that I can correct my mistakes immediately.
 
 **Acceptance Criteria:**
-
-- [ ] Text to type is visible above the input area
-- [ ] Text remains visible throughout the test
-- [ ] Displayed text matches the selected difficulty
+- Correctly typed characters are visually distinct from incorrect characters.
+- Highlighting updates instantly on every input event.
+- The current character position is visually indicated.
 
 **Tasks:**
-
-- [ ] Render target paragraph above input
-- [ ] Keep paragraph visible while typing
-- [ ] Load text based on selected difficulty
+- [ ] Implement a diffing function to compare the input string vs the target string.
+- [ ] Wrap target text characters in `<span>` tags for individual styling.
+- [ ] Ensure the current character is visually indicated (e.g., underline or caret).
 
 ---
 
-**User story**
-
-As a user, I want a clear input area so that I can type the displayed text easily.
+## 5. Standardized Results Calculation (Must-Have)
+**User Story:** As a user, I want to see my speed and accuracy calculated using industry standards.
 
 **Acceptance Criteria:**
+- WPM uses the standard formula based on correct characters typed.
+- Accuracy is calculated as a percentage of correct characters.
+- Results are displayed immediately upon test completion.
 
-- [ ] Input area is visually distinct and easy to focus
-- [ ] Supports typing the full paragraph without truncation
-- [ ] Disabled before test start and enabled on start
+**Technical Formulas:**
+- **WPM:** `(correct characters / 5) / minutes`
+- **Accuracy:** `(correct characters / total typed characters) * 100`
 
 **Tasks:**
-
-- [ ] Style input for visibility and focus
-- [ ] Ensure input supports full-length text
-- [ ] Disable input until Start is pressed
+- [ ] Implement the mathematical logic for WPM and Accuracy.
+- [ ] Capture precise `startTime` and `endTime` for elapsed time.
+- [ ] Build a results card UI component.
 
 ---
 
-**User story**
-
-As a user, I want my WPM shown after the test so that I can measure my speed.
+## 6. Persistent Best Results (Should-Have)
+**User Story:** As a competitive user, I want my best results for each level to be saved on my device.
 
 **Acceptance Criteria:**
-
-- [ ] Results display WPM, accuracy, and time
-- [ ] WPM uses standard formula (chars/5 per minute)
-- [ ] Results appear immediately after test end
+- Highest WPM for each level is stored in `localStorage`.
+- Best score is displayed on the dashboard for the selected difficulty.
 
 **Tasks:**
-
-- [ ] Implement WPM calculation
-- [ ] Capture accuracy and elapsed time
-- [ ] Render results on test completion
+- [ ] Create helper functions for `localStorage` (get/set).
+- [ ] Implement logic to compare and overwrite high scores.
+- [ ] Add a "Clear High Scores" button for user privacy.
 
 ---
 
-**User story**
-
-As a user, I want a retry option so that I can immediately try again.
+## 7. Test Instructions Modal (Should-Have)
+**User Story:** As a new user, I want a clear explanation of how the test works before I start.
 
 **Acceptance Criteria:**
-
-- [ ] "Retry" resets timer, input, and results
-- [ ] New text is loaded on retry (if available)
-- [ ] Retry is available on the results screen
+- A modal explains that the timer starts on the first keystroke.
+- The modal is accessible via an "Instructions" button.
 
 **Tasks:**
-
-- [ ] Add Retry button to results view
-- [ ] Reset test state on retry
-- [ ] Load new passage when retrying
+- [ ] Build a modal UI component with a backdrop overlay.
+- [ ] Add a "How it Works" button to the main navigation.
 
 ---
 
-**User story**
-
-As a user, I want real-time accuracy feedback so that I can correct mistakes as I type.
+## 8. Quick Retry Functionality (Should-Have)
+**User Story:** As a user, I want to quickly restart the test to keep practicing.
 
 **Acceptance Criteria:**
-
-- [ ] Incorrect characters are highlighted as typed
-- [ ] Correct vs incorrect counts update in real time
-- [ ] Accuracy percentage updates during the test
+- "Retry" resets the timer and clears input.
+- "Retry" loads a new passage at the same difficulty level.
 
 **Tasks:**
-
-- [ ] Compare typed text to target per character
-- [ ] Highlight correct/incorrect characters live
-- [ ] Update accuracy metrics on each input event
+- [ ] Create a global `resetTest()` function.
+- [ ] Ensure the "Retry" button resets all UI highlights and re-focuses the input.
 
 ---
 
-**User story**
-
-As a new user, I want clear instructions so that I can understand how the test works.
-
-**Acceptance Criteria:**
-
-- [ ] Instructions are visible before starting
-- [ ] Explain start, timing, and error handling
-- [ ] Instructions are accessible during the test
-
-**Tasks:**
-
-- [ ] Write concise instruction copy
-- [ ] Display instructions in pre-test view
-- [ ] Add in-test "How it works" access
-
----
-
-**User story**
-
-As a returning user, I want to see my best result so that I can track improvement.
-
-**Acceptance Criteria:**
-
-- [ ] Best WPM is saved locally
-- [ ] Best result is shown on home or results view
-- [ ] User can reset best result (optional)
-
-**Tasks:**
-
-- [ ] Save best WPM in localStorage
-- [ ] Display best score in UI
-- [ ] Add optional "reset best score" action
+## Tech Stack Recommendation
+- Frontend: HTML5, CSS3 (Flexbox/Grid), modern JavaScript (ES6+).
+- Storage: Browser `localStorage` API.
