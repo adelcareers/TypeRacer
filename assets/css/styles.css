@@ -325,3 +325,56 @@ select {
     min-height: 140px;
   }
 }
+
+/* --- Modal ---
+   Senior summary: Full-screen overlay that keeps focus on instructions.
+   Hidden by default and shown when the overlay is marked as active. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 16, 15, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+  z-index: 1000;
+}
+
+.modal-overlay.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-body {
+  margin-top: 12px;
+  color: var(--text);
+}
+
+.modal-body ul {
+  margin: 12px 0 0 18px;
+  padding: 0;
+  color: var(--muted);
+}
+
+.modal-body li {
+  margin-bottom: 6px;
+}
