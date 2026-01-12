@@ -64,14 +64,12 @@ window.addEventListener("DOMContentLoaded", () => {
     prepareTest({ inputEl, startButton, retryButton, statusEl });
   });
 
-  inputEl.addEventListener("keydown", () => {
+  inputEl.addEventListener("input", () => {
     if (state.status === "ready") {
       state.startedAt = performance.now();
       setStatus("active", statusEl);
     }
-  });
 
-  inputEl.addEventListener("input", () => {
     if (state.status !== "active") {
       return;
     }
