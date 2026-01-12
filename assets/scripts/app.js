@@ -1,14 +1,28 @@
-const setAppHeight = () => {
-  const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-  document.documentElement.style.setProperty("--app-height", `${height}px`);
-};
+// --- Entry Point ---
+/**
+ * Bootstraps the typing test UI once the DOM is ready.
+ * Side effects: initializes viewport sizing, wires event listeners, and mutates DOM state.
+ * Assumes required DOM nodes exist; exits early if any are missing to avoid runtime errors.
+ */
+function initApp() {
+  initViewportHeight();
 
-setAppHeight();
-window.addEventListener("resize", setAppHeight);
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", setAppHeight);
+  const elements = getDomElements();
+  if (!elements) {
+    return;
+  }
+
+  initializeUI(elements);
+  bindEventHandlers(elements);
 }
 
+window.addEventListener("DOMContentLoaded", initApp);
+
+// --- State and Data ---
+/**
+ * Global test state for the current session.
+ * Side effects: updated by event handlers; read by rendering/logic helpers.
+ */
 const state = {
   status: "idle",
   startedAt: null,
@@ -17,6 +31,10 @@ const state = {
   lastPassageIndex: null,
 };
 
+/**
+ * Static text pools by difficulty.
+ * Assumes passages are plain strings; used for randomized selection.
+ */
 const textPools = {
   Easy: [
     "The quick brown fox jumps over the lazy dog near the quiet riverbank.",
@@ -35,89 +53,13 @@ const textPools = {
   ],
 };
 
-const pickPassage = (difficulty) => {
-  const pool = textPools[difficulty] || textPools.Easy;
-  if (pool.length === 1) {
-    return { text: pool[0], index: 0 };
-  }
-
-  let index = Math.floor(Math.random() * pool.length);
-  if (index === state.lastPassageIndex) {
-    index = (index + 1) % pool.length;
-  }
-
-  return { text: pool[index], index };
-};
-
-const renderTargetText = (targetTextEl, text) => {
-  targetTextEl.innerHTML = "";
-  const fragment = document.createDocumentFragment();
-  [...text].forEach((char) => {
-    const span = document.createElement("span");
-    span.textContent = char;
-    fragment.appendChild(span);
-  });
-  targetTextEl.appendChild(fragment);
-};
-
-const updateFeedback = (targetTextEl, inputValue) => {
-  const spans = targetTextEl.querySelectorAll("span");
-  spans.forEach((span, index) => {
-    const typedChar = inputValue[index];
-    span.classList.remove("char-correct", "char-incorrect", "char-current");
-
-    if (typedChar == null) {
-      if (index === inputValue.length) {
-        span.classList.add("char-current");
-      }
-      return;
-    }
-
-    if (typedChar === span.textContent) {
-      span.classList.add("char-correct");
-    } else {
-      span.classList.add("char-incorrect");
-    }
-
-    if (index === inputValue.length) {
-      span.classList.add("char-current");
-    }
-  });
-};
-
-const updateTargetText = ({ targetTextEl, inputEl }, difficulty) => {
-  const { text, index } = pickPassage(difficulty);
-  renderTargetText(targetTextEl, text);
-  state.lastPassageIndex = index;
-  inputEl.value = "";
-};
-
-const setStatus = (nextStatus, statusEl) => {
-  state.status = nextStatus;
-  statusEl.textContent = `Status: ${nextStatus}`;
-};
-
-const prepareTest = ({ inputEl, startButton, retryButton, statusEl, targetTextEl }) => {
-  inputEl.value = "";
-  inputEl.disabled = false;
-  inputEl.focus();
-  state.startedAt = null;
-  state.endedAt = null;
-  setStatus("ready", statusEl);
-  startButton.disabled = true;
-  retryButton.disabled = true;
-  updateFeedback(targetTextEl, inputEl.value);
-};
-
-const finishTest = ({ inputEl, startButton, retryButton, statusEl }) => {
-  state.endedAt = performance.now();
-  inputEl.disabled = true;
-  setStatus("finished", statusEl);
-  startButton.disabled = false;
-  retryButton.disabled = false;
-};
-
-window.addEventListener("DOMContentLoaded", () => {
+// --- Core UI Workflow ---
+/**
+ * Collects required DOM elements.
+ * Side effects: none.
+ * Returns null if any required node is missing to avoid partial initialization.
+ */
+function getDomElements() {
   const startButton = document.getElementById("start-button");
   const retryButton = document.getElementById("retry-button");
   const inputEl = document.getElementById("typing-input");
@@ -135,41 +77,67 @@ window.addEventListener("DOMContentLoaded", () => {
     !difficultyEl ||
     !changeButton
   ) {
-    return;
+    return null;
   }
 
-  setStatus("idle", statusEl);
-  inputEl.disabled = true;
-  retryButton.disabled = true;
-  updateTargetText({ targetTextEl, inputEl }, state.difficulty);
-  updateFeedback(targetTextEl, inputEl.value);
+  return {
+    startButton,
+    retryButton,
+    inputEl,
+    targetTextEl,
+    statusEl,
+    difficultyEl,
+    changeButton,
+  };
+}
+
+/**
+ * Initializes the UI to a clean idle state.
+ * Side effects: updates DOM text, disabled states, and target text rendering.
+ */
+function initializeUI(elements) {
+  setStatus("idle", elements.statusEl);
+  elements.inputEl.disabled = true;
+  elements.retryButton.disabled = true;
+  updateTargetText(elements, state.difficulty);
+  updateFeedback(elements.targetTextEl, elements.inputEl.value);
+}
+
+/**
+ * Wires all UI event handlers.
+ * Side effects: registers listeners that mutate state and DOM.
+ */
+function bindEventHandlers(elements) {
+  const { startButton, retryButton, inputEl, targetTextEl, statusEl, difficultyEl, changeButton } =
+    elements;
 
   startButton.addEventListener("click", () => {
     if (state.status === "idle" || state.status === "finished") {
-      prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl });
+      prepareTest({ ...elements, statusEl });
     }
   });
 
   retryButton.addEventListener("click", () => {
-    prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl });
+    prepareTest({ ...elements, statusEl });
   });
 
   changeButton.addEventListener("click", () => {
     if (state.status === "active") {
       return;
     }
-    updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+    updateTargetText(elements, state.difficulty);
     updateFeedback(targetTextEl, inputEl.value);
   });
 
   difficultyEl.addEventListener("change", (event) => {
     if (state.status === "active") {
+      // Prevent mid-test difficulty changes to keep metrics consistent.
       difficultyEl.value = state.difficulty;
       return;
     }
 
     state.difficulty = event.target.value;
-    updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+    updateTargetText(elements, state.difficulty);
     updateFeedback(targetTextEl, inputEl.value);
     if (state.status === "finished") {
       setStatus("idle", statusEl);
@@ -189,10 +157,142 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const target = targetTextEl.textContent || "";
     updateFeedback(targetTextEl, inputEl.value);
+    const target = targetTextEl.textContent || "";
     if (inputEl.value === target) {
-      finishTest({ inputEl, startButton, retryButton, statusEl });
+      finishTest({ ...elements, statusEl });
     }
   });
-});
+}
+
+/**
+ * Transitions the test into the ready state.
+ * Side effects: clears input, focuses input, resets timer state, and updates controls.
+ */
+function prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl }) {
+  inputEl.value = "";
+  inputEl.disabled = false;
+  inputEl.focus();
+  state.startedAt = null;
+  state.endedAt = null;
+  setStatus("ready", statusEl);
+  startButton.disabled = true;
+  retryButton.disabled = true;
+  updateFeedback(targetTextEl, inputEl.value);
+}
+
+/**
+ * Finalizes the test once the target text is fully matched.
+ * Side effects: stamps end time, disables input, and updates controls.
+ */
+function finishTest({ inputEl, startButton, retryButton, statusEl }) {
+  state.endedAt = performance.now();
+  inputEl.disabled = true;
+  setStatus("finished", statusEl);
+  startButton.disabled = false;
+  retryButton.disabled = false;
+}
+
+// --- Feedback Rendering ---
+/**
+ * Updates the displayed target text for the selected difficulty.
+ * Side effects: updates the target text DOM and resets input state.
+ */
+function updateTargetText({ targetTextEl, inputEl }, difficulty) {
+  const { text, index } = pickPassage(difficulty);
+  renderTargetText(targetTextEl, text);
+  state.lastPassageIndex = index;
+  inputEl.value = "";
+}
+
+/**
+ * Renders target text as span-wrapped characters.
+ * Side effects: replaces inner HTML to enable per-character styling.
+ */
+function renderTargetText(targetTextEl, text) {
+  targetTextEl.innerHTML = "";
+  const fragment = document.createDocumentFragment();
+  [...text].forEach((char) => {
+    const span = document.createElement("span");
+    span.textContent = char;
+    fragment.appendChild(span);
+  });
+  targetTextEl.appendChild(fragment);
+}
+
+/**
+ * Applies correctness styling for each character based on current input.
+ * Side effects: mutates class names on target text spans.
+ * Assumes target text has been rendered into spans.
+ */
+function updateFeedback(targetTextEl, inputValue) {
+  const spans = targetTextEl.querySelectorAll("span");
+  spans.forEach((span, index) => {
+    const typedChar = inputValue[index];
+    span.classList.remove("char-correct", "char-incorrect", "char-current");
+
+    if (typedChar == null) {
+      if (index === inputValue.length) {
+        span.classList.add("char-current");
+      }
+      return;
+    }
+
+    if (typedChar === span.textContent) {
+      span.classList.add("char-correct");
+    } else {
+      span.classList.add("char-incorrect");
+    }
+
+    // Keep the caret indicator aligned with the next expected character.
+    if (index === inputValue.length) {
+      span.classList.add("char-current");
+    }
+  });
+}
+
+// --- Utilities ---
+/**
+ * Updates status text and state in a single helper.
+ * Side effects: mutates global state and updates DOM text.
+ */
+function setStatus(nextStatus, statusEl) {
+  state.status = nextStatus;
+  statusEl.textContent = `Status: ${nextStatus}`;
+}
+
+/**
+ * Selects a passage while avoiding immediate repetition.
+ * Side effects: none; uses global state to track the last index.
+ */
+function pickPassage(difficulty) {
+  const pool = textPools[difficulty] || textPools.Easy;
+  if (pool.length === 1) {
+    return { text: pool[0], index: 0 };
+  }
+
+  let index = Math.floor(Math.random() * pool.length);
+  // Avoid immediate repetition when possible.
+  if (index === state.lastPassageIndex) {
+    index = (index + 1) % pool.length;
+  }
+
+  return { text: pool[index], index };
+}
+
+/**
+ * Initializes viewport-dependent sizing for mobile keyboards.
+ * Side effects: writes CSS variables and registers resize listeners.
+ */
+function initViewportHeight() {
+  const applyHeight = () => {
+    const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    document.documentElement.style.setProperty("--app-height", `${height}px`);
+  };
+
+  applyHeight();
+  window.addEventListener("resize", applyHeight);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", applyHeight);
+  }
+}

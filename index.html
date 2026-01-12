@@ -25,6 +25,9 @@
   </head>
   <body>
     <div class="app">
+      <!-- === Header: Branding + Primary Actions ===
+           Senior summary: Establishes product identity and a top-level action hook.
+           Keeps navigation minimal for focus and remains consistent across breakpoints. -->
       <header class="app-header">
         <div class="brand">
           <span class="brand-mark" aria-hidden="true">⌨</span>
@@ -37,11 +40,17 @@
       </header>
 
       <main class="app-main">
+        <!-- === Instructions: Onboarding Context ===
+             Senior summary: Provides pre-test guidance without blocking the core flow.
+             Designed to collapse gracefully on mobile while remaining visible. -->
         <section class="card card-instructions" aria-label="Instructions">
           <h1>Test your typing speed</h1>
           <p>Press Start, then begin typing the text shown below. The timer starts on your first keystroke.</p>
         </section>
 
+        <!-- === Controls: Difficulty + Session Actions ===
+             Senior summary: Houses primary controls for test setup and session flow.
+             Buttons stay at tappable size for mobile ergonomics. -->
         <section class="card card-controls" aria-label="Controls">
           <div class="control-group">
             <label for="difficulty">Difficulty</label>
@@ -63,6 +72,9 @@
           </div>
         </section>
 
+        <!-- === Test Area: Target + Input ===
+             Senior summary: Keeps the prompt and input in one visual block to reduce eye travel.
+             The target text is rendered as spans for per-character feedback. -->
         <section class="card card-test" aria-label="Typing test">
           <div class="target-text" aria-live="polite" id="target-text">
             The quick brown fox jumps over the lazy dog near the quiet riverbank.
@@ -77,6 +89,9 @@
           ></textarea>
         </section>
 
+        <!-- === Results: Primary Metrics ===
+             Senior summary: Displays outcome metrics in a compact grid for quick scanning.
+             Prepared for future live updates without layout shifts. -->
         <section class="card card-results" aria-label="Results">
           <div class="result">
             <span class="result-label">WPM</span>

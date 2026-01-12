@@ -1,9 +1,15 @@
+/* --- Base Reset ---
+   Senior summary: Ensures predictable box sizing across all elements.
+   This avoids layout drift when padding/borders are added later. */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+/* --- Design Tokens ---
+   Senior summary: Centralized palette and sizing for consistent theming.
+   Changing these values updates the entire interface without layout changes. */
 :root {
   --bg: #f7f4ef;
   --surface: #ffffff;
@@ -17,6 +23,9 @@
   --app-height: 100dvh;
 }
 
+/* --- Global Layout ---
+   Senior summary: Establishes base typography and background treatment.
+   Uses a CSS variable for viewport height to handle mobile keyboards. */
 body {
   margin: 0;
   font-family: "Nunito", "Helvetica Neue", Arial, sans-serif;
@@ -25,6 +34,9 @@ body {
   min-height: var(--app-height);
 }
 
+/* --- App Shell ---
+   Senior summary: Defines the main layout container and vertical spacing.
+   Height uses the dynamic viewport variable to prevent keyboard overlap. */
 .app {
   min-height: var(--app-height);
   height: var(--app-height);
@@ -34,6 +46,8 @@ body {
   padding: 24px clamp(16px, 4vw, 48px) 40px;
 }
 
+/* --- Header ---
+   Senior summary: Aligns branding and primary actions with a responsive row. */
 .app-header {
   display: flex;
   align-items: center;
@@ -41,12 +55,16 @@ body {
   gap: 16px;
 }
 
+/* --- Brand Block ---
+   Senior summary: Keeps logo and title grouped for quick recognition. */
 .brand {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
+/* --- Brand Icon ---
+   Senior summary: Creates a compact visual anchor without external assets. */
 .brand-mark {
   display: inline-flex;
   align-items: center;
@@ -58,6 +76,8 @@ body {
   font-size: 24px;
 }
 
+/* --- Brand Text ---
+   Senior summary: Clear hierarchy for product name and supporting label. */
 .brand-title {
   font-size: 20px;
   font-weight: 700;
@@ -70,6 +90,8 @@ body {
   font-size: 14px;
 }
 
+/* --- Main Grid ---
+   Senior summary: 12-column grid enables predictable card placement and reflow. */
 .app-main {
   min-height: 0;
   overflow-y: auto;
@@ -78,6 +100,8 @@ body {
   gap: 20px;
 }
 
+/* --- Card System ---
+   Senior summary: Shared surface style for all content blocks. */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -102,6 +126,8 @@ body {
   grid-column: span 6;
 }
 
+/* --- Typography ---
+   Senior summary: Applies a serif headline for emphasis and a readable body. */
 h1 {
   margin: 0 0 8px;
   font-size: 28px;
@@ -114,6 +140,8 @@ p {
   line-height: 1.5;
 }
 
+/* --- Control Layout ---
+   Senior summary: Groups form controls and buttons with consistent spacing. */
 .control-group {
   display: flex;
   align-items: center;
@@ -126,6 +154,8 @@ label {
   font-weight: 600;
 }
 
+/* --- Form Inputs ---
+   Senior summary: Ensures touch-friendly inputs with consistent sizing. */
 select {
   min-width: 160px;
   min-height: 44px;
@@ -136,6 +166,8 @@ select {
   font-size: 16px;
 }
 
+/* --- Buttons ---
+   Senior summary: Base button sizing supports touch targets and visual rhythm. */
 .btn {
   min-height: 44px;
   min-width: 44px;
@@ -167,6 +199,8 @@ select {
   border-color: #eee6dd;
 }
 
+/* --- Typing Area ---
+   Senior summary: Keeps target text and input readable with generous spacing. */
 .target-text {
   font-size: 18px;
   line-height: 1.6;
@@ -177,6 +211,8 @@ select {
   white-space: pre-wrap;
 }
 
+/* --- Feedback Colors ---
+   Senior summary: Visual feedback classes for per-character correctness. */
 .char-correct {
   color: #13746a;
   background: rgba(19, 116, 106, 0.12);
@@ -207,6 +243,8 @@ select {
   background: #f5f5f2;
 }
 
+/* --- Results Grid ---
+   Senior summary: Compact metric cards for fast scanning and balance. */
 .card-results {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -233,6 +271,8 @@ select {
   font-weight: 700;
 }
 
+/* --- Accessibility Utilities ---
+   Senior summary: Screen-reader-only text for accessible labeling. */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -244,6 +284,8 @@ select {
   border: 0;
 }
 
+/* --- Responsive: Tablet ---
+   Senior summary: Collapses cards to full width and stacks header content. */
 @media (max-width: 1024px) {
   .card-instructions,
   .card-controls,
@@ -258,6 +300,8 @@ select {
   }
 }
 
+/* --- Responsive: Mobile ---
+   Senior summary: Single-column layout with larger tap targets and padding. */
 @media (max-width: 640px) {
   .app {
     padding: 20px 16px 32px;
