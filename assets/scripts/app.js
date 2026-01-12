@@ -71,6 +71,9 @@ function getDomElements() {
   const resultBestEl = document.getElementById("result-best");
   const resultAccuracyEl = document.getElementById("result-accuracy");
   const resultTimeEl = document.getElementById("result-time");
+  const instructionsModal = document.getElementById("instructions-modal");
+  const openInstructions = document.getElementById("open-instructions");
+  const closeInstructions = document.getElementById("close-instructions");
 
   if (
     !startButton ||
@@ -83,7 +86,10 @@ function getDomElements() {
     !resultWpmEl ||
     !resultBestEl ||
     !resultAccuracyEl ||
-    !resultTimeEl
+    !resultTimeEl ||
+    !instructionsModal ||
+    !openInstructions ||
+    !closeInstructions
   ) {
     return null;
   }
@@ -100,6 +106,9 @@ function getDomElements() {
     resultBestEl,
     resultAccuracyEl,
     resultTimeEl,
+    instructionsModal,
+    openInstructions,
+    closeInstructions,
   };
 }
 
@@ -122,8 +131,18 @@ function initializeUI(elements) {
  * Side effects: registers listeners that mutate state and DOM.
  */
 function bindEventHandlers(elements) {
-  const { startButton, retryButton, inputEl, targetTextEl, statusEl, difficultyEl, changeButton } =
-    elements;
+  const {
+    startButton,
+    retryButton,
+    inputEl,
+    targetTextEl,
+    statusEl,
+    difficultyEl,
+    changeButton,
+    instructionsModal,
+    openInstructions,
+    closeInstructions,
+  } = elements;
 
   startButton.addEventListener("click", () => {
     if (state.status === "idle" || state.status === "finished") {
@@ -176,6 +195,20 @@ function bindEventHandlers(elements) {
     const target = targetTextEl.textContent || "";
     if (inputEl.value === target) {
       finishTest({ ...elements, statusEl });
+    }
+  });
+
+  openInstructions.addEventListener("click", () => {
+    toggleInstructionsModal(instructionsModal, true);
+  });
+
+  closeInstructions.addEventListener("click", () => {
+    toggleInstructionsModal(instructionsModal, false);
+  });
+
+  instructionsModal.addEventListener("click", (event) => {
+    if (event.target === instructionsModal) {
+      toggleInstructionsModal(instructionsModal, false);
     }
   });
 }
@@ -348,6 +381,15 @@ function updateResults({ resultWpmEl, resultAccuracyEl, resultTimeEl }, results)
 function setStatus(nextStatus, statusEl) {
   state.status = nextStatus;
   statusEl.textContent = `Status: ${nextStatus}`;
+}
+
+/**
+ * Shows or hides the instructions modal.
+ * Side effects: toggles classes and aria-hidden for accessibility.
+ */
+function toggleInstructionsModal(modalEl, shouldOpen) {
+  modalEl.classList.toggle("is-active", shouldOpen);
+  modalEl.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
 }
 
 /**
