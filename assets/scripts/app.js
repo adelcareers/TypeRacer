@@ -49,9 +49,45 @@ const pickPassage = (difficulty) => {
   return { text: pool[index], index };
 };
 
+const renderTargetText = (targetTextEl, text) => {
+  targetTextEl.innerHTML = "";
+  const fragment = document.createDocumentFragment();
+  [...text].forEach((char) => {
+    const span = document.createElement("span");
+    span.textContent = char;
+    fragment.appendChild(span);
+  });
+  targetTextEl.appendChild(fragment);
+};
+
+const updateFeedback = (targetTextEl, inputValue) => {
+  const spans = targetTextEl.querySelectorAll("span");
+  spans.forEach((span, index) => {
+    const typedChar = inputValue[index];
+    span.classList.remove("char-correct", "char-incorrect", "char-current");
+
+    if (typedChar == null) {
+      if (index === inputValue.length) {
+        span.classList.add("char-current");
+      }
+      return;
+    }
+
+    if (typedChar === span.textContent) {
+      span.classList.add("char-correct");
+    } else {
+      span.classList.add("char-incorrect");
+    }
+
+    if (index === inputValue.length) {
+      span.classList.add("char-current");
+    }
+  });
+};
+
 const updateTargetText = ({ targetTextEl, inputEl }, difficulty) => {
   const { text, index } = pickPassage(difficulty);
-  targetTextEl.textContent = text;
+  renderTargetText(targetTextEl, text);
   state.lastPassageIndex = index;
   inputEl.value = "";
 };
@@ -61,7 +97,7 @@ const setStatus = (nextStatus, statusEl) => {
   statusEl.textContent = `Status: ${nextStatus}`;
 };
 
-const prepareTest = ({ inputEl, startButton, retryButton, statusEl }) => {
+const prepareTest = ({ inputEl, startButton, retryButton, statusEl, targetTextEl }) => {
   inputEl.value = "";
   inputEl.disabled = false;
   inputEl.focus();
@@ -70,6 +106,7 @@ const prepareTest = ({ inputEl, startButton, retryButton, statusEl }) => {
   setStatus("ready", statusEl);
   startButton.disabled = true;
   retryButton.disabled = true;
+  updateFeedback(targetTextEl, inputEl.value);
 };
 
 const finishTest = ({ inputEl, startButton, retryButton, statusEl }) => {
@@ -105,15 +142,16 @@ window.addEventListener("DOMContentLoaded", () => {
   inputEl.disabled = true;
   retryButton.disabled = true;
   updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+  updateFeedback(targetTextEl, inputEl.value);
 
   startButton.addEventListener("click", () => {
     if (state.status === "idle" || state.status === "finished") {
-      prepareTest({ inputEl, startButton, retryButton, statusEl });
+      prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl });
     }
   });
 
   retryButton.addEventListener("click", () => {
-    prepareTest({ inputEl, startButton, retryButton, statusEl });
+    prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl });
   });
 
   changeButton.addEventListener("click", () => {
@@ -121,6 +159,7 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
     updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+    updateFeedback(targetTextEl, inputEl.value);
   });
 
   difficultyEl.addEventListener("change", (event) => {
@@ -131,6 +170,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     state.difficulty = event.target.value;
     updateTargetText({ targetTextEl, inputEl }, state.difficulty);
+    updateFeedback(targetTextEl, inputEl.value);
     if (state.status === "finished") {
       setStatus("idle", statusEl);
       inputEl.disabled = true;
@@ -150,6 +190,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     const target = targetTextEl.textContent || "";
+    updateFeedback(targetTextEl, inputEl.value);
     if (inputEl.value === target) {
       finishTest({ inputEl, startButton, retryButton, statusEl });
     }
