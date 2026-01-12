@@ -1,0 +1,263 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #f7f4ef;
+  --surface: #ffffff;
+  --text: #1d1d1b;
+  --muted: #6a6a6a;
+  --accent: #0f766e;
+  --accent-strong: #0b5f58;
+  --border: #e1ddd7;
+  --shadow: 0 10px 25px rgba(15, 18, 25, 0.08);
+  --radius: 18px;
+  --app-height: 100dvh;
+}
+
+body {
+  margin: 0;
+  font-family: "Nunito", "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top, #fff7e8 0%, #f0efe9 45%, #e8ecec 100%);
+  min-height: var(--app-height);
+}
+
+.app {
+  min-height: var(--app-height);
+  height: var(--app-height);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px clamp(16px, 4vw, 48px) 40px;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #f9dcc5;
+  font-size: 24px;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.brand-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.app-main {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.card-instructions {
+  grid-column: span 7;
+}
+
+.card-controls {
+  grid-column: span 5;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-test,
+.card-results {
+  grid-column: span 6;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-family: "Alegreya", "Georgia", "Times New Roman", serif;
+}
+
+p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+label {
+  font-weight: 600;
+}
+
+select {
+  min-width: 160px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #fff;
+  font-size: 16px;
+}
+
+.btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background: var(--accent-strong);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btn-tertiary {
+  background: #f2f2ee;
+  border-color: #eee6dd;
+}
+
+.target-text {
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.typing-input {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 14px 16px;
+  font-size: 16px;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.typing-input:disabled {
+  background: #f5f5f2;
+}
+
+.card-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.result {
+  background: #f9f7f1;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid #efe8de;
+}
+
+.result-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.result-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+@media (max-width: 1024px) {
+  .card-instructions,
+  .card-controls,
+  .card-test,
+  .card-results {
+    grid-column: span 12;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    padding: 20px 16px 32px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  .control-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  select,
+  .btn {
+    width: 100%;
+  }
+
+  .typing-input {
+    min-height: 140px;
+  }
+}
