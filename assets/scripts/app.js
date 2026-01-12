@@ -68,6 +68,7 @@ function getDomElements() {
   const difficultyEl = document.getElementById("difficulty");
   const changeButton = document.getElementById("change-button");
   const resultWpmEl = document.getElementById("result-wpm");
+  const resultBestEl = document.getElementById("result-best");
   const resultAccuracyEl = document.getElementById("result-accuracy");
   const resultTimeEl = document.getElementById("result-time");
 
@@ -80,6 +81,7 @@ function getDomElements() {
     !difficultyEl ||
     !changeButton ||
     !resultWpmEl ||
+    !resultBestEl ||
     !resultAccuracyEl ||
     !resultTimeEl
   ) {
@@ -95,6 +97,7 @@ function getDomElements() {
     difficultyEl,
     changeButton,
     resultWpmEl,
+    resultBestEl,
     resultAccuracyEl,
     resultTimeEl,
   };
@@ -111,6 +114,7 @@ function initializeUI(elements) {
   updateTargetText(elements, state.difficulty);
   updateFeedback(elements.targetTextEl, elements.inputEl.value);
   updateResults(elements, null);
+  updateBestDisplay(elements, state.difficulty);
 }
 
 /**
@@ -149,6 +153,7 @@ function bindEventHandlers(elements) {
     state.difficulty = event.target.value;
     updateTargetText(elements, state.difficulty);
     updateFeedback(targetTextEl, inputEl.value);
+    updateBestDisplay(elements, state.difficulty);
     if (state.status === "finished") {
       setStatus("idle", statusEl);
       inputEl.disabled = true;
@@ -195,16 +200,27 @@ function prepareTest({ inputEl, startButton, retryButton, statusEl, targetTextEl
  * Finalizes the test once the target text is fully matched.
  * Side effects: stamps end time, disables input, and updates controls.
  */
-function finishTest({ inputEl, startButton, retryButton, statusEl, resultWpmEl, resultAccuracyEl, resultTimeEl }) {
+function finishTest({
+  inputEl,
+  startButton,
+  retryButton,
+  statusEl,
+  resultWpmEl,
+  resultBestEl,
+  resultAccuracyEl,
+  resultTimeEl,
+}) {
   state.endedAt = performance.now();
   inputEl.disabled = true;
   setStatus("finished", statusEl);
   startButton.disabled = false;
   retryButton.disabled = false;
+  const results = calculateResults(inputEl.value, state.startedAt, state.endedAt);
   updateResults(
     { resultWpmEl, resultAccuracyEl, resultTimeEl },
-    calculateResults(inputEl.value, state.startedAt, state.endedAt)
+    results
   );
+  updateBestDisplay({ resultBestEl }, state.difficulty, results.wpm);
 }
 
 // --- Feedback Rendering ---
@@ -332,6 +348,49 @@ function updateResults({ resultWpmEl, resultAccuracyEl, resultTimeEl }, results)
 function setStatus(nextStatus, statusEl) {
   state.status = nextStatus;
   statusEl.textContent = `Status: ${nextStatus}`;
+}
+
+/**
+ * Retrieves the best WPM for the given difficulty from localStorage.
+ * Side effects: none; returns null if storage is unavailable or empty.
+ */
+function getBestWpm(difficulty) {
+  try {
+    const value = window.localStorage.getItem(`typeracer:best:${difficulty}`);
+    return value ? Number(value) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Stores the best WPM for the given difficulty in localStorage.
+ * Side effects: writes to browser storage; silently ignores failures.
+ */
+function setBestWpm(difficulty, value) {
+  try {
+    window.localStorage.setItem(`typeracer:best:${difficulty}`, String(value));
+  } catch (error) {
+    // Storage may be blocked; avoid breaking the test flow.
+  }
+}
+
+/**
+ * Updates the best WPM display and optionally saves a new high score.
+ * Side effects: writes to localStorage and updates DOM text.
+ */
+function updateBestDisplay({ resultBestEl }, difficulty, latestWpm) {
+  const stored = getBestWpm(difficulty);
+  let best = stored;
+
+  if (typeof latestWpm === "number" && !Number.isNaN(latestWpm)) {
+    if (best == null || latestWpm > best) {
+      best = latestWpm;
+      setBestWpm(difficulty, latestWpm);
+    }
+  }
+
+  resultBestEl.textContent = best == null ? "--" : best.toString();
 }
 
 /**
